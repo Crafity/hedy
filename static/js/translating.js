@@ -1,4 +1,4 @@
-$(function() {
+$(function () {
   /**
    * Count newlines and also estimate how the text will be line wrapped
    */
@@ -19,7 +19,6 @@ $(function() {
     return ret;
   }
 
-
   function resizeArea(el) {
     var lines = Math.max(1, estimateLineCount($(el).val()));
     var targetHeight = lines * 25 + 4;
@@ -30,21 +29,22 @@ $(function() {
     }
   }
 
-  $('textarea').each((i, el) => resizeArea(el)).on('input', e => {
-    const target = $(e.target);
-    if (!target.hasClass('touched')) {
-      target.addClass('touched');
+  $('textarea')
+    .each((i, el) => resizeArea(el))
+    .on('input', e => {
+      const target = $(e.target);
+      if (!target.hasClass('touched')) {
+        target.addClass('touched');
 
-      // Change the 'data-name="xxx"' attribute into an actual 'name="xxx"' attribute
-      // so that the value is actually submitted via the form.
-      target.attr('name', target.data('name'));
+        // Change the 'data-name="xxx"' attribute into an actual 'name="xxx"' attribute
+        // so that the value is actually submitted via the form.
+        target.attr('name', target.data('name'));
 
-      recordChangeToForm(target.closest('form'));
-    }
+        recordChangeToForm(target.closest('form'));
+      }
 
-    resizeArea(target);
-  });
-
+      resizeArea(target);
+    });
 
   var FORM_MAP = new Map();
 
@@ -57,7 +57,7 @@ $(function() {
       formData = {
         button: button,
         changes: 0,
-      }
+      };
 
       FORM_MAP.set(fileName, formData);
     }

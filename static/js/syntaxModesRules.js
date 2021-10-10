@@ -12,7 +12,7 @@ function baseRules() {
         regex: '.*',
         token: 'text',
         next: 'start',
-      }
+      },
     ],
 
     // this function creates two rules, one to recognize strings and at random within a line (staying in the same state)
@@ -24,7 +24,7 @@ function baseRules() {
       },
       {
         regex: 'at random',
-        token: 'keyword'
+        token: 'keyword',
       },
       {
         regex: '$', // $ matches with end of line
@@ -37,7 +37,8 @@ function baseRules() {
 const LEVELS = [
   {
     name: 'level1',
-    rules: pipe(baseRules(),
+    rules: pipe(
+      baseRules(),
       rule_print('gobble'),
       rule_turtle(),
       recognize('start', {
@@ -49,257 +50,254 @@ const LEVELS = [
         regex: 'ask ',
         token: 'keyword',
         next: 'gobble',
-      }),
+      })
     ),
   },
   {
     // Adds lists and 'at random'
     name: 'level2',
-    rules: pipe(baseRules(),
+    rules: pipe(
+      baseRules(),
 
       rule_print('expression_eol'),
       rule_isAsk('gobble'),
       rule_is('gobble'),
 
-      rule_turtle(),
-
+      rule_turtle()
     ),
   },
   {
     // Adds quoted text
     name: 'level3',
-    rules: pipe(baseRules(),
-      rule_turtle(),
-      rule_print('expression_eol'),
-      rule_isAsk(),
-      rule_is(),
-    ),
+    rules: pipe(baseRules(), rule_turtle(), rule_print('expression_eol'), rule_isAsk(), rule_is()),
   },
   {
     // Adds if/else
     name: 'level4',
-    rules: pipe(baseRules(),
-      rule_print(),
-      rule_isAsk(),
-      rule_is(),
-      rule_ifElse(),
-      rule_expressions(),
-    ),
+    rules: pipe(baseRules(), rule_print(), rule_isAsk(), rule_is(), rule_ifElse(), rule_expressions()),
   },
   {
     // Adds repeat
     name: 'level5',
-    rules: pipe(baseRules(),
-      rule_print(),
-      rule_isAsk(),
-      rule_is(),
-      rule_ifElse(),
-      rule_expressions(),
-      rule_repeat(),
-    ),
+    rules: pipe(baseRules(), rule_print(), rule_isAsk(), rule_is(), rule_ifElse(), rule_expressions(), rule_repeat()),
   },
   {
     // Adds arithmetic
     name: 'level6',
-    rules: pipe(baseRules(),
+    rules: pipe(
+      baseRules(),
       rule_print(),
       rule_isAsk(),
       rule_is(),
       rule_ifElse(),
       rule_expressions(),
       rule_repeat(),
-      rule_arithmetic(),
+      rule_arithmetic()
     ),
   },
   {
     // Adds indented blocks -- no changes to highlighter necessary
     name: 'level7',
-    rules: pipe(baseRules(),
+    rules: pipe(
+      baseRules(),
       rule_print(),
       rule_isAsk(),
       rule_is(),
       rule_ifElse(),
       rule_expressions(),
       rule_repeat(),
-      rule_arithmetic(),
+      rule_arithmetic()
     ),
   },
   {
     // Replaces 'repeat' with 'for'
     name: 'level8and9',
-    rules: pipe(baseRules(),
+    rules: pipe(
+      baseRules(),
       rule_print(),
       rule_isAsk(),
       rule_is(),
       rule_ifElse(),
       rule_expressions(),
       rule_arithmetic(),
-      rule_forRange(),
+      rule_forRange()
     ),
   },
   {
     // Nesting of 'for' loops (no changes necessary)
     name: 'level10',
-    rules: pipe(baseRules(),
+    rules: pipe(
+      baseRules(),
       rule_print(),
       rule_isAsk(),
       rule_is(),
       rule_ifElse(),
       rule_expressions(),
       rule_arithmetic(),
-      rule_forRange(),
+      rule_forRange()
     ),
   },
   {
     // Adding fncall parens
     name: 'level11',
-    rules: pipe(baseRules(),
+    rules: pipe(
+      baseRules(),
       rule_printParen(),
       rule_isInputParen(),
       rule_is(),
       rule_ifElse(),
       rule_expressions(),
       rule_arithmetic(),
-      rule_forRangeParen(),
+      rule_forRangeParen()
     ),
   },
-// ----------------------------------------------------------------
-//  Everything below this line hasn't been done yet
-// ----------------------------------------------------------------
+  // ----------------------------------------------------------------
+  //  Everything below this line hasn't been done yet
+  // ----------------------------------------------------------------
   {
     name: 'level11',
-    rules: pipe(baseRules(),
+    rules: pipe(
+      baseRules(),
       rule_printParen(),
       rule_isInputParen(),
       rule_is(),
       rule_ifElse(),
       rule_expressions(),
       rule_arithmetic(),
-      rule_forRangeParen(),
+      rule_forRangeParen()
     ),
   },
   {
     name: 'level12',
-    rules: pipe(baseRules(),
+    rules: pipe(
+      baseRules(),
       rule_printParen(),
       rule_isInputParen(),
       rule_is(),
       rule_ifElse(),
       rule_expressions(),
       rule_arithmetic(),
-      rule_forRangeParen(),
+      rule_forRangeParen()
     ),
   },
   {
     name: 'level13',
-    rules: pipe(baseRules(),
+    rules: pipe(
+      baseRules(),
       rule_printParen(),
       rule_isInputParen(),
       rule_is(),
       rule_ifElse(),
       rule_expressions(),
       rule_arithmetic(),
-      rule_forRangeParen(),
+      rule_forRangeParen()
     ),
   },
   {
     name: 'level14',
-    rules: pipe(baseRules(),
+    rules: pipe(
+      baseRules(),
       rule_printParen(),
       rule_isInputParen(),
       rule_is(),
       rule_ifElse(),
       rule_expressions(),
       rule_arithmetic(),
-      rule_forRangeParen(),
+      rule_forRangeParen()
     ),
   },
   {
     name: 'level15',
-    rules: pipe(baseRules(),
+    rules: pipe(
+      baseRules(),
       rule_printParen(),
       rule_isInputParen(),
       rule_is(),
       rule_ifElse(),
       rule_expressions(),
       rule_arithmetic(),
-      rule_forRangeParen(),
+      rule_forRangeParen()
     ),
   },
   {
     name: 'level16',
-    rules: pipe(baseRules(),
+    rules: pipe(
+      baseRules(),
       rule_printParen(),
       rule_isInputParen(),
       rule_is(),
       rule_ifElse(),
       rule_expressions(),
       rule_arithmetic(),
-      rule_forRangeParen(),
+      rule_forRangeParen()
     ),
   },
   {
     name: 'level17and18',
-    rules: pipe(baseRules(),
+    rules: pipe(
+      baseRules(),
       rule_printParen(),
       rule_isInputParen(),
       rule_is(),
       rule_ifElse(),
       rule_expressions(),
       rule_arithmetic(),
-      rule_forRangeParen(),
+      rule_forRangeParen()
     ),
   },
   {
     name: 'level19',
-    rules: pipe(baseRules(),
+    rules: pipe(
+      baseRules(),
       rule_printParen(),
       rule_isInputParen(),
       rule_is(),
       rule_ifElse(),
       rule_expressions(),
       rule_arithmetic(),
-      rule_forRangeParen(),
+      rule_forRangeParen()
     ),
   },
   {
     name: 'level20',
-    rules: pipe(baseRules(),
+    rules: pipe(
+      baseRules(),
       rule_printParen(),
       rule_isInputParen(),
       rule_is(),
       rule_ifElse(),
       rule_expressions(),
       rule_arithmetic(),
-      rule_forRangeParen(),
+      rule_forRangeParen()
     ),
   },
   {
     name: 'level21',
-    rules: pipe(baseRules(),
+    rules: pipe(
+      baseRules(),
       rule_printParen(),
       rule_isInputParen(),
       rule_is(),
       rule_ifElse(),
       rule_expressions(),
       rule_arithmetic(),
-      rule_forRangeParen(),
+      rule_forRangeParen()
     ),
   },
   {
     name: 'level22',
-    rules: pipe(baseRules(),
+    rules: pipe(
+      baseRules(),
       rule_printParen(),
       rule_isInputParen(),
       rule_is(),
       rule_ifElse(),
       rule_expressions(),
       rule_arithmetic(),
-      rule_forRangeParen(),
+      rule_forRangeParen()
     ),
   },
 ];
-
 
 /**
  * From a list of rules, duplicate all rules
@@ -334,7 +332,7 @@ function finishLine(rules) {
  * - recognize('start', [{ ... }, {...}])
  */
 function recognize(stateOrStates, ruleOrRules) {
-  return (rules) => {
+  return rules => {
     if (!Array.isArray(stateOrStates)) {
       stateOrStates = [stateOrStates];
     }
@@ -360,7 +358,7 @@ function recognize(stateOrStates, ruleOrRules) {
  * Returns f1 ○ f2 ○ f3 ○ ...
  */
 function comp(...fns) {
-  return (val) => {
+  return val => {
     for (const fn of fns) {
       val = fn(val);
     }
@@ -419,28 +417,24 @@ function rule_printParen() {
   return recognize('start', {
     regex: '(print)(\\()',
     token: ['keyword', 'paren.lparen'],
-    next: 'start'
+    next: 'start',
   });
 }
 
 function rule_turtle() {
-    return comp(
-      recognize('start', {
-        regex: 'turn (left|right)?',
-        token: 'keyword',
-        next: 'start',
-      }),
-      recognize('start', {
-        regex: 'forward',
-        token: 'keyword',
-        next: 'start',
-      })
-    )
+  return comp(
+    recognize('start', {
+      regex: 'turn (left|right)?',
+      token: 'keyword',
+      next: 'start',
+    }),
+    recognize('start', {
+      regex: 'forward',
+      token: 'keyword',
+      next: 'start',
+    })
+  );
 }
-
-
-
-
 
 /**
  * Add an 'is input' rule with brackets
@@ -449,7 +443,7 @@ function rule_isInputParen() {
   return recognize('start', {
     regex: '(\\w+)( is input)(\\()',
     token: ['text', 'keyword', 'paren.lparen'],
-    next: 'start'
+    next: 'start',
   });
 }
 
@@ -464,15 +458,14 @@ function rule_expressions() {
     }),
     recognize('start', {
       regex: 'at random',
-      token: 'keyword'
+      token: 'keyword',
     }),
     recognize('start', {
       regex: '[, ]+',
       token: 'punctuation.operator',
-    }),
+    })
   );
 }
-
 
 /**
  * Add highlighting for if/else, also add a condition
@@ -492,7 +485,7 @@ function rule_ifElse() {
       regex: completeKeyword('is'),
       token: 'keyword',
       next: 'start',
-    }),
+    })
   );
 }
 
@@ -500,20 +493,23 @@ function rule_ifElse() {
  * Add numbers and arithmetic
  */
 function rule_arithmetic() {
-  return recognize(['start', 'expression_eol'], [
-    {
-      regex: ' \\* ',
-      token: 'keyword',
-    },
-    {
-      regex: ' \\+ ',
-      token: 'keyword',
-    },
-    {
-      regex: ' \\- ',
-      token: 'keyword',
-    },
-  ]);
+  return recognize(
+    ['start', 'expression_eol'],
+    [
+      {
+        regex: ' \\* ',
+        token: 'keyword',
+      },
+      {
+        regex: ' \\+ ',
+        token: 'keyword',
+      },
+      {
+        regex: ' \\- ',
+        token: 'keyword',
+      },
+    ]
+  );
 }
 
 /**
@@ -557,9 +553,8 @@ function loosenRules(rules) {
 
 // Define the modes based on the level definitions above
 for (const level of LEVELS) {
-
   // This is a local definition of the file 'ace/mode/level1.js', etc.
-  define('ace/mode/' + level.name, [], function(require, exports, module) {
+  define('ace/mode/' + level.name, [], function (require, exports, module) {
     var oop = require('ace/lib/oop');
     var TextMode = require('ace/mode/text').Mode;
     var TextHighlightRules = require('ace/mode/text_highlight_rules').TextHighlightRules;
@@ -568,12 +563,12 @@ for (const level of LEVELS) {
       this.$rules = loosenRules(level.rules);
       console.log(level.name, this.$rules);
       this.normalizeRules();
-    };
+    }
     oop.inherits(ThisLevelHighlightRules, TextHighlightRules);
 
     function Mode() {
       this.HighlightRules = ThisLevelHighlightRules;
-    };
+    }
     oop.inherits(Mode, TextMode);
 
     exports.Mode = Mode;

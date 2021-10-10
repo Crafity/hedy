@@ -28,19 +28,23 @@ for (const preview of $('.turn-pre-into-ace pre').get()) {
     .addClass('green-btn')
     .text('⇥')
     .appendTo(buttonContainer)
-    .click(function () {
-      window.editor.setValue(exampleEditor.getValue() + '\n');
+    .click(() => {
+      window.editor.setValue(`${exampleEditor.getValue()}\n`);
     });
 }
 
 /**
  * Initialize the main editor and attach all the required event handlers
+ * @param {JQuery<HTMLElement>} $editor Editor dom element
+ * @returns {undefined}
  */
-function initializeMainEditor($editor) {
-  if (!$editor.length) return;
+function initializeMainEditor($editor: JQuery<HTMLElement>): undefined {
+  if (!$editor.length) {
+    return;
+  }
 
   // We expose the editor globally so it's available to other functions for resizing
-  var editor = (window.editor = turnIntoAceEditor($editor.get(0), $editor.data('readonly')));
+  const editor = (window.editor = turnIntoAceEditor($editor.get(0), $editor.data('readonly')));
 
   // Load existing code from session, if it exists
   const storage = window.sessionStorage;
@@ -54,13 +58,15 @@ function initializeMainEditor($editor) {
     }
 
     // When the user exits the editor, save what we have.
-    editor.on('blur', function (e) {
+    editor.on('blur', e => {
       storage.setItem(levelKey, editor.getValue());
     });
 
     // If prompt is shown and user enters text in the editor, hide the prompt.
-    editor.on('change', function () {
-      if ($('#inline-modal').is(':visible')) $('#inline-modal').hide();
+    editor.on('change', () => {
+      if ($('#inline-modal').is(':visible')) {
+        $('#inline-modal').hide();
+      }
       window.State.disable_run = false;
       $('#runit').css('background-color', '');
       window.State.unsaved_changes = true;
@@ -73,7 +79,9 @@ function initializeMainEditor($editor) {
     // The browser doesn't show this message, rather it shows a default message.
     if (window.State.unsaved_changes) {
       // This allows us to avoid showing the programmatic modal from `prompt_unsaved` and then the native one
-      if (!window.State.no_unload_prompt) return window.auth.texts.unsaved_changes;
+      if (!window.State.no_unload_prompt) {
+        return window.auth.texts.unsaved_changes;
+      }
     }
   };
 
@@ -82,11 +90,13 @@ function initializeMainEditor($editor) {
   let altPressed;
 
   // alt is 18, enter is 13
-  window.addEventListener('keydown', function (ev) {
-    const keyCode = (ev || document.event).keyCode;
-    if (keyCode === 18) return (altPressed = true);
+  window.addEventListener('keydown', ev => {
+    const { keyCode } = ev || document.event;
+    if (keyCode === 18) {
+      return (altPressed = true);
+    }
     if (keyCode === 13 && altPressed) {
-      runit(window.State.level, window.State.lang, function () {
+      runit(window.State.level, window.State.lang, () => {
         $('#output').focus();
       });
     }
@@ -96,9 +106,11 @@ function initializeMainEditor($editor) {
       editor.navigateFileEnd();
     }
   });
-  window.addEventListener('keyup', function (ev) {
-    const keyCode = (ev || document.event).keyCode;
-    if (keyCode === 18) return (altPressed = false);
+  window.addEventListener('keyup', ev => {
+    const { keyCode } = ev || document.event;
+    if (keyCode === 18) {
+      return (altPressed = false);
+    }
   });
 }
 
@@ -118,7 +130,7 @@ function turnIntoAceEditor(element, isReadOnly) {
   }
 
   // a variable which turns on(1) highlighter or turns it off(0)
-  var highlighter = 1;
+  const highlighter = 1;
 
   if (highlighter == 1) {
     // Everything turns into 'ace/mode/levelX', except what's in
@@ -141,38 +153,44 @@ function turnIntoAceEditor(element, isReadOnly) {
 
 function reloadOnExpiredSession() {
   // If user is not logged in or session is not expired, return false.
-  if (!window.auth.profile || window.auth.profile.session_expires_at > Date.now()) return false;
+  if (!window.auth.profile || window.auth.profile.session_expires_at > Date.now()) {
+    return false;
+  }
   // Otherwise, reload the page to update the top bar.
   location.reload();
   return true;
 }
 
 function runit(level, lang, cb) {
-  if (window.State.disable_run) return window.modal.alert(window.auth.texts.answer_question);
+  if (window.State.disable_run) {
+    return window.modal.alert(window.auth.texts.answer_question);
+  }
 
-  if (reloadOnExpiredSession()) return;
+  if (reloadOnExpiredSession()) {
+    return;
+  }
 
   error.hide();
   try {
     level = level.toString();
-    var editor = ace.edit('editor');
-    var code = editor.getValue();
+    const editor = ace.edit('editor');
+    const code = editor.getValue();
 
     console.log('Original program:\n', code);
     $.ajax({
       type: 'POST',
       url: '/parse',
       data: JSON.stringify({
-        level: level,
+        level,
         sublevel: window.State.sublevel ? window.State.sublevel : undefined,
-        code: code,
-        lang: lang,
+        code,
+        lang,
         adventure_name: window.State.adventure_name,
       }),
       contentType: 'application/json',
       dataType: 'json',
     })
-      .done(function (response) {
+      .done(response => {
         console.log('Response', response);
         if (response.Warning) {
           error.showWarning(ErrorMessages.Transpile_warning, response.Warning);
@@ -181,13 +199,13 @@ function runit(level, lang, cb) {
           error.show(ErrorMessages.Transpile_error, response.Error);
           return;
         }
-        runPythonProgram(response.Code, response.has_turtle, cb).catch(function (err) {
+        runPythonProgram(response.Code, response.has_turtle, cb).catch(err => {
           console.log(err);
           error.show(ErrorMessages.Execute_error, err.message);
           reportClientError(level, code, err.message);
         });
       })
-      .fail(function (xhr) {
+      .fail(xhr => {
         console.error(xhr);
         // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/readyState
         if (xhr.readyState < 4) {
@@ -202,29 +220,35 @@ function runit(level, lang, cb) {
   }
 }
 
-/**
+/*
  * Called when the user clicks the "Try" button in one of the palette buttons
  */
 function tryPaletteCode(exampleCode) {
-  var editor = ace.edit('editor');
+  const editor = ace.edit('editor');
 
-  var MOVE_CURSOR_TO_END = 1;
-  editor.setValue(exampleCode + '\n', MOVE_CURSOR_TO_END);
+  const MOVE_CURSOR_TO_END = 1;
+  editor.setValue(`${exampleCode}\n`, MOVE_CURSOR_TO_END);
   window.State.unsaved_changes = false;
 }
 
 window.saveit = function saveit(level, lang, name, code, cb) {
-  if (window.State.sublevel) return window.modal.alert('Sorry, you cannot save programs when in a sublevel.');
+  if (window.State.sublevel) {
+    return window.modal.alert('Sorry, you cannot save programs when in a sublevel.');
+  }
   error.hide();
 
-  if (reloadOnExpiredSession()) return;
+  if (reloadOnExpiredSession()) {
+    return;
+  }
 
   try {
     // If there's no session but we want to save the program, we store the program data in localStorage and redirect to /login.
     if (!window.auth.profile) {
-      return window.modal.confirm(window.auth.texts.save_prompt, function () {
+      return window.modal.confirm(window.auth.texts.save_prompt, () => {
         // If there's an adventure_name, we store it together with the level, because it won't be available otherwise after signup/login.
-        if (window.State && window.State.adventure_name) level = [level, window.State.adventure_name];
+        if (window.State && window.State.adventure_name) {
+          level = [level, window.State.adventure_name];
+        }
         localStorage.setItem('hedy-first-save', JSON.stringify([level, lang, name, code]));
         window.location.pathname = '/login';
       });
@@ -232,7 +256,7 @@ window.saveit = function saveit(level, lang, name, code, cb) {
 
     window.State.unsaved_changes = false;
 
-    var adventure_name = window.State.adventure_name;
+    let { adventure_name } = window.State;
     // If saving a program for an adventure after a signup/login, level is an array of the form [level, adventure_name]. In that case, we unpack it.
     if (level instanceof Array) {
       adventure_name = level[1];
@@ -243,18 +267,20 @@ window.saveit = function saveit(level, lang, name, code, cb) {
       type: 'POST',
       url: '/programs',
       data: JSON.stringify({
-        level: level,
-        lang: lang,
-        name: name,
-        code: code,
-        adventure_name: adventure_name,
+        level,
+        lang,
+        name,
+        code,
+        adventure_name,
       }),
       contentType: 'application/json',
       dataType: 'json',
     })
-      .done(function (response) {
+      .done(response => {
         // The auth functions use this callback function.
-        if (cb) return response.Error ? cb(response) : cb(null, response);
+        if (cb) {
+          return response.Error ? cb(response) : cb(null, response);
+        }
         if (response.Warning) {
           error.showWarning(ErrorMessages.Transpile_warning, response.Warning);
         }
@@ -267,13 +293,13 @@ window.saveit = function saveit(level, lang, name, code, cb) {
         // To avoid this, we'd have to perform a page refresh to retrieve the info from the server again, which would be more cumbersome.
         // The name of the program might have been changed by the server, so we use the name stated by the server.
         $('#program_name').val(response.name);
-        window.State.adventures.map(function (adventure) {
+        window.State.adventures.map(adventure => {
           if (adventure.short_name === (adventure_name || 'level')) {
-            adventure.loaded_program = { name: response.name, code: code };
+            adventure.loaded_program = { name: response.name, code };
           }
         });
       })
-      .fail(function (err) {
+      .fail(err => {
         console.error(err);
         error.show(ErrorMessages.Connection_error, JSON.stringify(err));
         if (err.status === 403) {
@@ -292,65 +318,76 @@ window.saveit = function saveit(level, lang, name, code, cb) {
 };
 
 function viewProgramLink(programId) {
-  return window.location.origin + '/hedy/' + programId + '/view';
+  return `${window.location.origin}/hedy/${programId}/view`;
 }
 
 window.share_program = function share_program(level, lang, id, Public, reload) {
-  if (!window.auth.profile) return window.modal.alert(window.auth.texts.must_be_logged);
+  if (!window.auth.profile) {
+    return window.modal.alert(window.auth.texts.must_be_logged);
+  }
 
-  var share = function (id) {
+  const share = function (id) {
     $.ajax({
       type: 'POST',
       url: '/programs/share',
       data: JSON.stringify({
-        id: id,
+        id,
         public: Public,
       }),
       contentType: 'application/json',
       dataType: 'json',
     })
-      .done(function (response) {
+      .done(response => {
         // If we're sharing the program, copy the link to the clipboard.
-        if (Public) window.copy_to_clipboard(viewProgramLink(id), true);
+        if (Public) {
+          window.copy_to_clipboard(viewProgramLink(id), true);
+        }
         window.modal.alert(
           Public ? window.auth.texts.share_success_detail : window.auth.texts.unshare_success_detail,
           4000
         );
-        if (reload)
-          setTimeout(function () {
+        if (reload) {
+          setTimeout(() => {
             location.reload();
           }, 1000);
+        }
       })
-      .fail(function (err) {
+      .fail(err => {
         console.error(err);
         error.show(ErrorMessages.Connection_error, JSON.stringify(err));
       });
   };
 
   // If id is not true, the request comes from the programs page. In that case, we merely call the share function.
-  if (id !== true) return share(id);
+  if (id !== true) {
+    return share(id);
+  }
 
   // Otherwise, we save the program and then share it.
   // Saving the program makes things way simpler for many reasons: it covers the cases where:
   // 1) there's no saved program; 2) there's no saved program for that user; 3) the program has unsaved changes.
-  var name = $('#program_name').val();
-  var code = ace.edit('editor').getValue();
-  return saveit(level, lang, name, code, function (err, resp) {
-    if (err && err.Warning) return error.showWarning(ErrorMessages.Transpile_warning, err.Warning);
-    if (err && err.Error) return error.show(ErrorMessages.Transpile_error, err.Error);
+  const name = $('#program_name').val();
+  const code = ace.edit('editor').getValue();
+  return saveit(level, lang, name, code, (err, resp) => {
+    if (err && err.Warning) {
+      return error.showWarning(ErrorMessages.Transpile_warning, err.Warning);
+    }
+    if (err && err.Error) {
+      return error.show(ErrorMessages.Transpile_error, err.Error);
+    }
     share(resp.id);
   });
 };
 
 window.copy_to_clipboard = function copy_to_clipboard(string, noAlert) {
   // https://hackernoon.com/copying-text-to-clipboard-with-javascript-df4d4988697f
-  var el = document.createElement('textarea');
+  const el = document.createElement('textarea');
   el.value = string;
   el.setAttribute('readonly', '');
   el.style.position = 'absolute';
   el.style.left = '-9999px';
   document.body.appendChild(el);
-  var selected = document.getSelection().rangeCount > 0 ? document.getSelection().getRangeAt(0) : false;
+  const selected = document.getSelection().rangeCount > 0 ? document.getSelection().getRangeAt(0) : false;
   el.select();
   document.execCommand('copy');
   document.body.removeChild(el);
@@ -358,7 +395,9 @@ window.copy_to_clipboard = function copy_to_clipboard(string, noAlert) {
     document.getSelection().removeAllRanges();
     document.getSelection().addRange(selected);
   }
-  if (!noAlert) window.modal.alert(window.auth.texts.copy_clipboard, 4000);
+  if (!noAlert) {
+    window.modal.alert(window.auth.texts.copy_clipboard, 4000);
+  }
 };
 
 /**
@@ -369,10 +408,10 @@ function reportClientError(level, code, client_error) {
     type: 'POST',
     url: '/report_error',
     data: JSON.stringify({
-      level: level,
-      code: code,
+      level,
+      code,
       page: window.location.href,
-      client_error: client_error,
+      client_error,
     }),
     contentType: 'application/json',
     dataType: 'json',
@@ -384,11 +423,11 @@ window.onerror = function reportClientException(message, source, line_number, co
     type: 'POST',
     url: '/client_exception',
     data: JSON.stringify({
-      message: message,
-      source: source,
-      line_number: line_number,
-      column_number: column_number,
-      error: error,
+      message,
+      source,
+      line_number,
+      column_number,
+      error,
       url: window.location.href,
       user_agent: navigator.userAgent,
     }),
@@ -424,14 +463,14 @@ function runPythonProgram(code, hasTurtle, cb) {
   });
 
   return Sk.misceval
-    .asyncToPromise(function () {
-      return Sk.importMainWithBody('<stdin>', false, code, true);
-    })
-    .then(function (mod) {
+    .asyncToPromise(() => Sk.importMainWithBody('<stdin>', false, code, true))
+    .then(mod => {
       console.log('Program executed');
-      if (cb) cb();
+      if (cb) {
+        cb();
+      }
     })
-    .catch(function (err) {
+    .catch(err => {
       // Extract error message from error
       console.log(err);
       const errorMessage = errorMessageFromSkulptError(err) || JSON.stringify(err);
@@ -464,8 +503,10 @@ function runPythonProgram(code, hasTurtle, cb) {
   }
 
   function builtinRead(x) {
-    if (Sk.builtinFiles === undefined || Sk.builtinFiles['files'][x] === undefined) throw "File not found: '" + x + "'";
-    return Sk.builtinFiles['files'][x];
+    if (Sk.builtinFiles === undefined || Sk.builtinFiles.files[x] === undefined) {
+      throw `File not found: '${x}'`;
+    }
+    return Sk.builtinFiles.files[x];
   }
 
   /**
@@ -476,18 +517,18 @@ function runPythonProgram(code, hasTurtle, cb) {
    */
   // Note: this method is currently not being used.
   function inputFromTerminal(prompt) {
-    return new Promise(function (ok) {
-      addToOutput(prompt + '\n', 'white');
+    return new Promise(ok => {
+      addToOutput(`${prompt}\n`, 'white');
       const input = $('<input>').attr('placeholder', 'Typ hier je antwoord').appendTo(outputDiv).focus();
 
       // When enter is pressed, turn the input box into a regular
       // span and resolve the promise
-      input.on('keypress', function (e) {
+      input.on('keypress', e => {
         if (e.which == 13 /* ENTER */) {
           const text = input.val();
 
           input.remove();
-          addToOutput(text + '\n', 'yellow');
+          addToOutput(`${text}\n`, 'yellow');
           ok(text);
         }
       });
@@ -496,7 +537,7 @@ function runPythonProgram(code, hasTurtle, cb) {
 
   // This method draws the prompt for asking for user input.
   function inputFromInlineModal(prompt) {
-    return new Promise(function (ok) {
+    return new Promise(ok => {
       window.State.disable_run = true;
       $('#runit').css('background-color', 'gray');
 
@@ -506,10 +547,10 @@ function runPythonProgram(code, hasTurtle, cb) {
       input[0].placeholder = prompt;
       speak(prompt);
 
-      setTimeout(function () {
+      setTimeout(() => {
         input.focus();
       }, 0);
-      $('#inline-modal form').one('submit', function (event) {
+      $('#inline-modal form').one('submit', event => {
         window.State.disable_run = false;
         $('#runit').css('background-color', '');
 
@@ -529,21 +570,27 @@ var error = {
   hide() {
     $('#errorbox').hide();
     $('#warningbox').hide();
-    if ($('#editor').length) editor.resize();
+    if ($('#editor').length) {
+      editor.resize();
+    }
   },
 
   showWarning(caption, message) {
     $('#warningbox .caption').text(caption);
     $('#warningbox .details').text(message);
     $('#warningbox').show();
-    if ($('#editor').length) editor.resize();
+    if ($('#editor').length) {
+      editor.resize();
+    }
   },
 
   show(caption, message) {
     $('#errorbox .caption').text(caption);
     $('#errorbox .details').text(message);
     $('#errorbox').show();
-    if ($('#editor').length) editor.resize();
+    if ($('#editor').length) {
+      editor.resize();
+    }
   },
 };
 
@@ -554,87 +601,81 @@ function queryParam(param) {
 
 function buildUrl(url, params) {
   const clauses = [];
-  for (let key in params) {
+  for (const key in params) {
     const value = params[key];
     if (value !== undefined && value !== '') {
-      clauses.push(encodeURIComponent(key) + '=' + encodeURIComponent(value));
+      clauses.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
     }
   }
-  return url + (clauses.length > 0 ? '?' + clauses.join('&') : '');
+  return url + (clauses.length > 0 ? `?${clauses.join('&')}` : '');
 }
 
-(function () {
-  window.speak = function speak(text) {
-    var selectedURI = $('#speak_dropdown').val();
-    if (!selectedURI) {
-      return;
-    }
-    var voice = window.speechSynthesis.getVoices().filter(v => v.voiceURI === selectedURI)[0];
+window.speak = function speak(text) {
+  const selectedURI = $('#speak_dropdown').val();
+  if (!selectedURI) {
+    return;
+  }
+  const voice = window.speechSynthesis.getVoices().filter(v => v.voiceURI === selectedURI)[0];
 
-    if (voice) {
-      let utterance = new SpeechSynthesisUtterance(text);
-      utterance.voice = voice;
-      utterance.rate = 0.9;
-      speechSynthesis.speak(utterance);
-    }
-  };
+  if (voice) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.voice = voice;
+    utterance.rate = 0.9;
+    speechSynthesis.speak(utterance);
+  }
+};
 
+if (!window.speechSynthesis) {
+  return; /* No point in even trying */
+}
+if (!window.State.lang) {
+  return; /* Not on a code page */
+}
+
+/**
+ * Show the "speak" checkbox if we find that we have speech support for the
+ * current language (showing an initially hidden element is a better experience
+ * than hiding an initially shown element... arguably... ?)
+ *
+ * Also, for funzies: the speechSynthesis.getVoices() array is asynchronously
+ * populated *some time* after the page loads... and we won't know when. Keep
+ * on testing periodically until we got it or it's taken too long to finish.
+ */
+let attempts = 0;
+const timer = setInterval(() => {
+  attempts += 1;
+
+  const voices = findVoices(window.State.lang);
+
+  if (voices.length > 0) {
+    for (const voice of voices) {
+      $('#speak_dropdown').append($('<option>').attr('value', voice.voiceURI).text(`📣 ${voice.name}`));
+    }
+
+    $('#speak_container').show();
+
+    clearInterval(timer);
+  }
+  if (attempts >= 20) {
+    // ~2 seconds
+    // Give up
+    clearInterval(timer);
+  }
+}, 100);
+
+function findVoices(lang) {
+  // Our own "lang" is *typically* just the language code, but we also have "pt_BR".
+  const simpleLang = lang.match(/^([a-z]+)/i)[1];
+
+  // If the feature doesn't exist in the browser, return null
   if (!window.speechSynthesis) {
-    return; /* No point in even trying */
+    return [];
   }
-  if (!window.State.lang) {
-    return; /* Not on a code page */
-  }
-
-  /**
-   * Show the "speak" checkbox if we find that we have speech support for the
-   * current language (showing an initially hidden element is a better experience
-   * than hiding an initially shown element... arguably... ?)
-   *
-   * Also, for funzies: the speechSynthesis.getVoices() array is asynchronously
-   * populated *some time* after the page loads... and we won't know when. Keep
-   * on testing periodically until we got it or it's taken too long to finish.
-   */
-  let attempts = 0;
-  const timer = setInterval(function () {
-    attempts += 1;
-
-    const voices = findVoices(window.State.lang);
-
-    if (voices.length > 0) {
-      for (const voice of voices) {
-        $('#speak_dropdown').append(
-          $('<option>')
-            .attr('value', voice.voiceURI)
-            .text('📣 ' + voice.name)
-        );
-      }
-
-      $('#speak_container').show();
-
-      clearInterval(timer);
-    }
-    if (attempts >= 20) {
-      // ~2 seconds
-      // Give up
-      clearInterval(timer);
-    }
-  }, 100);
-
-  function findVoices(lang) {
-    // Our own "lang" is *typically* just the language code, but we also have "pt_BR".
-    const simpleLang = lang.match(/^([a-z]+)/i)[1];
-
-    // If the feature doesn't exist in the browser, return null
-    if (!window.speechSynthesis) {
-      return [];
-    }
-    return window.speechSynthesis.getVoices().filter(voice => voice.lang.startsWith(simpleLang));
-  }
-})();
+  return window.speechSynthesis.getVoices().filter(voice => voice.lang.startsWith(simpleLang));
+}
 
 window.create_class = function create_class() {
-  window.modal.prompt(window.auth.texts.class_name_prompt, '', function (class_name) {
+  window.modal.prompt(window.auth.texts.class_name_prompt, '', class_name => {
     $.ajax({
       type: 'POST',
       url: '/class',
@@ -644,10 +685,10 @@ window.create_class = function create_class() {
       contentType: 'application/json',
       dataType: 'json',
     })
-      .done(function (response) {
+      .done(response => {
         location.reload();
       })
-      .fail(function (err) {
+      .fail(err => {
         console.error(err);
         error.show(ErrorMessages.Connection_error, JSON.stringify(err));
       });
@@ -655,20 +696,20 @@ window.create_class = function create_class() {
 };
 
 window.rename_class = function rename_class(id) {
-  window.modal.prompt(window.auth.texts.class_name_prompt, '', function (class_name) {
+  window.modal.prompt(window.auth.texts.class_name_prompt, '', class_name => {
     $.ajax({
       type: 'PUT',
-      url: '/class/' + id,
+      url: `/class/${id}`,
       data: JSON.stringify({
         name: class_name,
       }),
       contentType: 'application/json',
       dataType: 'json',
     })
-      .done(function (response) {
+      .done(response => {
         location.reload();
       })
-      .fail(function (err) {
+      .fail(err => {
         console.error(err);
         error.show(ErrorMessages.Connection_error, JSON.stringify(err));
       });
@@ -676,17 +717,17 @@ window.rename_class = function rename_class(id) {
 };
 
 window.delete_class = function delete_class(id) {
-  window.modal.confirm(window.auth.texts.delete_class_prompt, function () {
+  window.modal.confirm(window.auth.texts.delete_class_prompt, () => {
     $.ajax({
       type: 'DELETE',
-      url: '/class/' + id,
+      url: `/class/${id}`,
       contentType: 'application/json',
       dataType: 'json',
     })
-      .done(function (response) {
+      .done(response => {
         window.location.pathname = '/for-teachers';
       })
-      .fail(function (err) {
+      .fail(err => {
         console.error(err);
         error.show(ErrorMessages.Connection_error, JSON.stringify(err));
       });
@@ -694,12 +735,12 @@ window.delete_class = function delete_class(id) {
 };
 
 window.join_class = function join_class(link, name, noRedirect) {
-  // If there's no session but we want to join the class, we store the program data in localStorage and redirect to /login.
+  // If there's no session but we want to join the class,
+  // we store the program data in localStorage and redirect to /login.
   if (!window.auth.profile) {
-    return window.modal.confirm(window.auth.texts.join_prompt, function () {
-      localStorage.setItem('hedy-join', JSON.stringify({ link: link, name: name }));
+    return window.modal.confirm(window.auth.texts.join_prompt, () => {
+      localStorage.setItem('hedy-join', JSON.stringify({ link, name }));
       window.location.pathname = '/login';
-      return;
     });
   }
 
@@ -707,28 +748,30 @@ window.join_class = function join_class(link, name, noRedirect) {
     type: 'GET',
     url: link,
   })
-    .done(function (response) {
-      window.modal.alert(window.auth.texts.class_join_confirmation + ' ' + name);
-      if (!noRedirect) window.location.pathname = '/programs';
+    .done(response => {
+      window.modal.alert(`${window.auth.texts.class_join_confirmation} ${name}`);
+      if (!noRedirect) {
+        window.location.pathname = '/programs';
+      }
     })
-    .fail(function (err) {
+    .fail(err => {
       console.error(err);
       error.show(ErrorMessages.Connection_error, JSON.stringify(err));
     });
 };
 
 window.remove_student = function delete_class(class_id, student_id) {
-  window.modal.confirm(window.auth.texts.remove_student_prompt, function () {
+  window.modal.confirm(window.auth.texts.remove_student_prompt, () => {
     $.ajax({
       type: 'DELETE',
-      url: '/class/' + class_id + '/student/' + student_id,
+      url: `/class/${class_id}/student/${student_id}`,
       contentType: 'application/json',
       dataType: 'json',
     })
-      .done(function (response) {
+      .done(response => {
         location.reload();
       })
-      .fail(function (err) {
+      .fail(err => {
         console.error(err);
         error.show(ErrorMessages.Connection_error, JSON.stringify(err));
       });
@@ -736,7 +779,9 @@ window.remove_student = function delete_class(class_id, student_id) {
 };
 
 window.prompt_unsaved = function prompt_unsaved(cb) {
-  if (!window.State.unsaved_changes) return cb();
+  if (!window.State.unsaved_changes) {
+    return cb();
+  }
   // This variable avoids showing the generic native `onbeforeunload` prompt
   window.State.no_unload_prompt = true;
   window.modal.confirm(window.auth.texts.unsaved_changes, cb);

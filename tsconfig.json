@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ES5",
+    "lib": ["DOM", "ES2017"],
+    "jsx": "react",
+    "module": "commonjs",
+    "sourceMap": true,
+    "allowJs": false,
+    "skipLibCheck": true,
+    "strict": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "downlevelIteration": true,
+    "noEmit": true,
+    "importHelpers": true,
+    "typeRoots": ["./static/@types", "./node_modules/@types"]
+  },
+  "include": ["static"],
+  "exclude": ["node_modules"]
+}
